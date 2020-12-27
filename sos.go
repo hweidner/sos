@@ -40,7 +40,6 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"log"
 	"math/rand"
 	"os"
 	"time"
@@ -90,6 +89,7 @@ func (s *SOS) Destroy() {
 }
 
 // Store stores a key/value pair in the object store.
+//
 // New values are stored in a temporary file and being moved to the final
 // place in order to make writes atomic and locking free.
 func (s *SOS) Store(key string, value []byte) error {
@@ -125,6 +125,8 @@ func (s *SOS) Store(key string, value []byte) error {
 	return os.Rename(tmpname, filename)
 }
 
+// Get fetches an object from tthe store, identified by the key.
+//
 // Value files are hardlinked to a temporary file before read, so that a
 // concurrent Store/Delete operation on the same key does not break an already
 // started read operation.
@@ -169,6 +171,7 @@ func (s *SOS) Get(key string) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+// Delete removes an object from the store
 func (s *SOS) Delete(key string) error {
 	if s.base == "" {
 		return fmt.Errorf("SOS: Running Delete on a destroyed store")
@@ -201,16 +204,10 @@ func (s *SOS) tmpfilename() string {
 	return tmpfname
 }
 
-// internal (unexported) helper methods
-
-func errlog(err error) {
-	if err != nil {
-		log.Print(err)
-	}
-}
-
 // initialization
 
 func init() {
+	// seed the random number generator, so it delivers different random
+	// numbers on each startup.
 	rand.Seed(time.Now().UnixNano())
 }
