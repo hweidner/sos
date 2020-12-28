@@ -1,4 +1,5 @@
 [![GoDoc](https://godoc.org/github.com/hweidner/sos?status.svg)](https://godoc.org/github.com/hweidner/sos)
+[![Go Reference](https://pkg.go.dev/badge/github.com/hweidner/sos.svg)](https://pkg.go.dev/github.com/hweidner/sos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hweidner/sos)](https://goreportcard.com/report/github.com/hweidner/sos)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/hweidner/sos.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hweidner/sos/alerts/)
 

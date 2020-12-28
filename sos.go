@@ -51,7 +51,12 @@ type SOS struct {
 	base       string
 }
 
-// New creates a new simple object store at the directory `path`.
+// New creates a new simple object store at the directory path.
+//
+// The path must point to a location which lies on a UNIX-like file system. It
+// must support the open/read/write/close methods, and UNIX-style hard links.
+// The directory under path must not cross file system boundaries. If the
+// directory does not exist yet, it is created upon invocation.
 func New(path string) (*SOS, error) {
 	if path == "" {
 		return nil, fmt.Errorf("SOS: path for object storage must not be empty")
@@ -79,7 +84,9 @@ func New(path string) (*SOS, error) {
 	}, nil
 }
 
-// Destroy will delete an object store and remove all of its content.
+// Destroy will delete an object store and remove all of its content, and the
+// directory itself.
+//
 // Note: on NFS, this can break running Get operations.
 func (s *SOS) Destroy() {
 	if s.base != "" {
