@@ -95,7 +95,8 @@ func (s *SOS) Destroy() {
 	}
 }
 
-// Store stores a key/value pair in the object store.
+// Store stores a key/value pair, given as string and byte slice, in the
+// object store.
 //
 // New values are stored in a temporary file and being moved to the final
 // place in order to make writes atomic and locking free.
@@ -115,11 +116,13 @@ func (s *SOS) Store(key string, value []byte) error {
 
 	_, err = io.Copy(wr, bytes.NewReader(value))
 	if err != nil {
+		_ = os.Remove(tmpname)
 		return err
 	}
 
 	err = wr.Close()
 	if err != nil {
+		_ = os.Remove(tmpname)
 		return err
 	}
 
@@ -132,7 +135,48 @@ func (s *SOS) Store(key string, value []byte) error {
 	return os.Rename(tmpname, filename)
 }
 
-// Get fetches an object from tthe store, identified by the key.
+// StoreFrom stores a value, which is read from an io.Reader, under the given
+// key in the object store.
+//
+// New values are stored in a temporary file and being moved to the final
+// place in order to make writes atomic and locking free.
+func (s *SOS) StoreFrom(key string, rd io.Reader) error {
+	if s.base == "" {
+		return fmt.Errorf("SOS: Running Store on a destroyed store")
+	}
+
+	dirname, filename := s.getpath(key)
+	tmpname := s.tmpfilename()
+
+	// write object to temporary file
+	wr, err := os.OpenFile(tmpname, os.O_WRONLY|os.O_CREATE, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(wr, rd)
+	if err != nil {
+		_ = os.Remove(tmpname)
+		return err
+	}
+
+	err = wr.Close()
+	if err != nil {
+		_ = os.Remove(tmpname)
+		return err
+	}
+
+	// create directory in storage space.
+	// Note: errors are ok here, because the directory could have been created
+	// by another process in the meantime
+	_ = os.MkdirAll(dirname, os.FileMode(0700))
+
+	// move object to final directory and name
+	return os.Rename(tmpname, filename)
+}
+
+// Get fetches an object from the store, identified by the key, and returns
+// it as byte slice.
 //
 // Value files are hardlinked to a temporary file before read, so that a
 // concurrent Store/Delete operation on the same key does not break an already
@@ -152,25 +196,16 @@ func (s *SOS) Get(key string) ([]byte, error) {
 	if err != nil {
 		return nil, nil
 	}
+	defer os.Remove(tmpname)
 
 	// read key from file
 	fh, err := os.Open(tmpname)
 	if err != nil {
 		return nil, err
 	}
+	defer fh.Close()
 
 	_, err = io.Copy(buffer, fh)
-	if err != nil {
-		return nil, err
-	}
-
-	err = fh.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	// remove temporary file
-	err = os.Remove(tmpname)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +213,39 @@ func (s *SOS) Get(key string) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// Delete removes an object from the store
+// GetTo fetches an object from the store, identified by the key, and copies
+// it into an io.Writer.
+//
+// Value files are hardlinked to a temporary file before read, so that a
+// concurrent Store/Delete operation on the same key does not break an already
+// started read operation.
+func (s *SOS) GetTo(key string, wr io.Writer) error {
+	if s.base == "" {
+		return fmt.Errorf("SOS: Running Get on a destroyed store")
+	}
+
+	_, filename := s.getpath(key)
+	tmpname := s.tmpfilename()
+
+	// create hard link
+	err := os.Link(filename, tmpname)
+	if err != nil {
+		return fmt.Errorf("SOS: Key does not exist")
+	}
+	defer os.Remove(tmpname)
+
+	// read value from file
+	fh, err := os.Open(tmpname)
+	if err != nil {
+		return err
+	}
+	defer fh.Close()
+
+	_, err = io.Copy(wr, fh)
+	return err
+}
+
+// Delete removes an object from the store.
 func (s *SOS) Delete(key string) error {
 	if s.base == "" {
 		return fmt.Errorf("SOS: Running Delete on a destroyed store")

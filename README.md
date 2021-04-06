@@ -30,7 +30,9 @@ The following methods are provided:
 
 * Create a new Simple Object Store
 * Store a new object (key/value pair) or overwrite an existing object
+* Store an object from an io.Reader
 * Get an object (value) by key
+* Get an object into an io.Writer
 * Delete an object from the store
 * Destroy a Simple Object Store entirely
 
@@ -83,10 +85,8 @@ implemented if needed at a later time.
 * Lock/Unlock object
 * Read and Delete object (atomic)
 * Read or Write if it does not exist (atomic)
-* Accept/deliver a stream instead of loading the whole object into memory
 
 ## License
 
 The SOS package is released under the terms of the GNU Lesser General Public
 License, version 3. See the [LICENSE](LICENSE) file for details.
-
