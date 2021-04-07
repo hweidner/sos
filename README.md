@@ -28,11 +28,13 @@ OCFS2 as shared/distributed file systems.
 
 The following methods are provided:
 
-* Create a new Simple Object Store
-* Store a new object (key/value pair) or overwrite an existing object
-* Store an object from an io.Reader
-* Get an object (value) by key
-* Get an object into an io.Writer
+* Create a new Simple Object Store.
+* Store a new object (key/value pair) or overwrite an existing object.
+  There are three methods to store a value from a byte slice, string, or out
+  of an io.Reader.
+* Get an object (value) by key.
+  There are three methods to get a value into a byte slice, string, or to an
+  io.Writer.
 * Delete an object from the store
 * Destroy a Simple Object Store entirely
 

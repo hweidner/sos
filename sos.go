@@ -98,9 +98,6 @@ func (s *SOS) Destroy() {
 
 // Store stores a key/value pair, given as string and byte slice, in the
 // object store.
-//
-// New values are stored in a temporary file and being moved to the final
-// place in order to make writes atomic and locking free.
 func (s *SOS) Store(key string, value []byte) error {
 	return s.StoreFrom(key, bytes.NewReader(value))
 }
@@ -175,10 +172,6 @@ func (s *SOS) GetString(key string) (string, error) {
 
 // GetTo fetches an object from the store, identified by the key, and copies
 // it into an io.Writer.
-//
-// Value files are hardlinked to a temporary file before read, so that a
-// concurrent Store/Delete operation on the same key does not break an already
-// started read operation.
 func (s *SOS) GetTo(key string, wr io.Writer) error {
 	if s.base == "" {
 		return fmt.Errorf("SOS: Running Get on a destroyed store")
