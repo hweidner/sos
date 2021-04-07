@@ -160,9 +160,9 @@ func (s *SOS) Get(key string) ([]byte, error) {
 // GetString fetches an object from the store, identified by the key, and returns
 // it as a string
 func (s *SOS) GetString(key string) (string, error) {
-	buffer := new(bytes.Buffer)
+	var buffer strings.Builder
 
-	err := s.GetTo(key, buffer)
+	err := s.GetTo(key, &buffer)
 	if err != nil {
 		return "", err
 	}
