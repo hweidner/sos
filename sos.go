@@ -1,4 +1,4 @@
-// (c) 2020 by Harald Weidner
+// (c) 2020-2021 by Harald Weidner
 //
 // This library is released under the GNU Lesser General Public License
 // version 3 (LGPLv3). See the LICENSE file for details.
@@ -42,6 +42,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -101,45 +102,16 @@ func (s *SOS) Destroy() {
 // New values are stored in a temporary file and being moved to the final
 // place in order to make writes atomic and locking free.
 func (s *SOS) Store(key string, value []byte) error {
-	if s.base == "" {
-		return fmt.Errorf("SOS: Running Store on a destroyed store")
-	}
+	return s.StoreFrom(key, bytes.NewReader(value))
+}
 
-	dirname, filename := s.getpath(key)
-	tmpname := s.tmpfilename()
-
-	// write object to temporary file
-	wr, err := os.OpenFile(tmpname, os.O_WRONLY|os.O_CREATE, os.FileMode(0600))
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(wr, bytes.NewReader(value))
-	if err != nil {
-		_ = os.Remove(tmpname)
-		return err
-	}
-
-	err = wr.Close()
-	if err != nil {
-		_ = os.Remove(tmpname)
-		return err
-	}
-
-	// create directory in storage space.
-	// Note: errors are ok here, because the directory could have been created
-	// by another process in the meantime
-	_ = os.MkdirAll(dirname, os.FileMode(0700))
-
-	// move object to final directory and name
-	return os.Rename(tmpname, filename)
+// StoreString stores a key/value pair, given as strings, in the object store.
+func (s *SOS) StoreString(key, value string) error {
+	return s.StoreFrom(key, strings.NewReader(value))
 }
 
 // StoreFrom stores a value, which is read from an io.Reader, under the given
 // key in the object store.
-//
-// New values are stored in a temporary file and being moved to the final
-// place in order to make writes atomic and locking free.
 func (s *SOS) StoreFrom(key string, rd io.Reader) error {
 	if s.base == "" {
 		return fmt.Errorf("SOS: Running Store on a destroyed store")
@@ -177,40 +149,28 @@ func (s *SOS) StoreFrom(key string, rd io.Reader) error {
 
 // Get fetches an object from the store, identified by the key, and returns
 // it as byte slice.
-//
-// Value files are hardlinked to a temporary file before read, so that a
-// concurrent Store/Delete operation on the same key does not break an already
-// started read operation.
 func (s *SOS) Get(key string) ([]byte, error) {
-	if s.base == "" {
-		return nil, fmt.Errorf("SOS: Running Get on a destroyed store")
-	}
-
-	_, filename := s.getpath(key)
-	tmpname := s.tmpfilename()
 	buffer := new(bytes.Buffer)
 
-	// create hard link. Note that errors are ok here, as the key might not
-	// exist.
-	err := os.Link(filename, tmpname)
-	if err != nil {
-		return nil, nil
-	}
-	defer os.Remove(tmpname)
-
-	// read key from file
-	fh, err := os.Open(tmpname)
-	if err != nil {
-		return nil, err
-	}
-	defer fh.Close()
-
-	_, err = io.Copy(buffer, fh)
+	err := s.GetTo(key, buffer)
 	if err != nil {
 		return nil, err
 	}
 
 	return buffer.Bytes(), nil
+}
+
+// GetString fetches an object from the store, identified by the key, and returns
+// it as a string
+func (s *SOS) GetString(key string) (string, error) {
+	buffer := new(bytes.Buffer)
+
+	err := s.GetTo(key, buffer)
+	if err != nil {
+		return "", err
+	}
+
+	return buffer.String(), nil
 }
 
 // GetTo fetches an object from the store, identified by the key, and copies

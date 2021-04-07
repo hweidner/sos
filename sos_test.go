@@ -1,4 +1,4 @@
-// (c) 2020 by Harald Weidner
+// (c) 2020-2021 by Harald Weidner
 //
 // This library is released under the GNU Lesser General Public License
 // version 3 (LGPLv3). See the LICENSE file for details.
@@ -10,33 +10,43 @@ import (
 	"testing"
 )
 
+// Test the byte slice and string interface
 func TestSOS(t *testing.T) {
 	s, _ := New("./._sostest")
 
-	key := "hello"
-	obj1 := ([]byte)("world")
+	key1, val1 := "hello", "world"
+	key2, val2 := "foo", "bar"
 
-	s.Store(key, obj1)
+	s.StoreString(key1, val1)
+	s.Store(key2, []byte(val2))
 
-	obj2, _ := s.Get(key)
-	if string(obj1) != string(obj2) {
-		t.Errorf("Got %v from store, expected %v", obj2, obj1)
+	obj1s, _ := s.Get(key1)
+	obj1 := string(obj1s)
+	obj2, _ := s.GetString(key2)
+
+	if obj1 != val1 {
+		t.Errorf("Got %s from store, expected %s", obj1, val1)
 	}
 
-	s.Delete(key)
-	obj3, _ := s.Get(key)
+	if obj2 != val2 {
+		t.Errorf("Got %s from store, expected %s", obj2, val2)
+	}
+
+	s.Delete(key1)
+	obj3, _ := s.Get(key1)
 	if string(obj3) != "" {
 		t.Errorf("Got non empty value for deleted object")
 	}
 
 	s.Destroy()
-	s.Store(key, obj1)
-	obj4, _ := s.Get(key)
+	s.StoreString(key1, val1)
+	obj4, _ := s.Get(key1)
 	if string(obj4) != "" {
 		t.Errorf("Got non empty value from destroyed object store")
 	}
 }
 
+// Test the Reader/Writer interface directly
 func TestSOSFile(t *testing.T) {
 	s, _ := New("./._sostest")
 
@@ -54,4 +64,5 @@ func TestSOSFile(t *testing.T) {
 	}
 
 	s.Delete(key)
+	s.Destroy()
 }
