@@ -1,7 +1,7 @@
 // (c) 2020-2021 by Harald Weidner
 //
-// This library is released under the GNU Lesser General Public License
-// version 3 (LGPLv3). See the LICENSE file for details.
+// This library is released under the Mozilla License, version 2 (MPLv2).
+// See the LICENSE file for details.
 
 package sos
 

@@ -1,4 +1,4 @@
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+[![License: MPLv2](https://img.shields.io/badge/License-MPLv2-blue.svg)](https://www.mozilla.org/en-US/MPL/)
 [![GoDocs](https://godocs.io/github.com/hweidner/sos?status.svg)](https://godocs.io/github.com/hweidner/sos)
 [![Go Reference](https://pkg.go.dev/badge/github.com/hweidner/sos.svg)](https://pkg.go.dev/github.com/hweidner/sos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hweidner/sos)](https://goreportcard.com/report/github.com/hweidner/sos)
@@ -90,5 +90,6 @@ implemented if needed at a later time.
 
 ## License
 
-The SOS package is released under the terms of the GNU Lesser General Public
-License, version 3. See the [LICENSE](LICENSE) file for details.
+The SOS package is released under the terms of the
+[Mozilla License, version 2 (MPLv2)](https://www.mozilla.org/en-US/MPL/).
+See the [LICENSE](LICENSE) file for details.
