@@ -2,7 +2,7 @@
 [![GoDocs](https://godocs.io/github.com/hweidner/sos?status.svg)](https://godocs.io/github.com/hweidner/sos)
 [![Go Reference](https://pkg.go.dev/badge/github.com/hweidner/sos.svg)](https://pkg.go.dev/github.com/hweidner/sos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hweidner/sos)](https://goreportcard.com/report/github.com/hweidner/sos)
-[![Scc Count Badge](https://sloc.xyz/github.com/hweidner/sos)](https://github.com/hweidner/sos)
+[![Scc Count Badge](https://sloc.xyz/github/hweidner/sos)](https://github.com/hweidner/sos)
 
 
 # SOS - Simple Object Storage
