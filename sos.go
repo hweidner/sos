@@ -31,7 +31,6 @@ The Get operation first creates a hard link to a temporary file before reading
 from that file. This ensures that a Store to the same key does not affect an
 already started Get operation. This is a bit slower than accessing the storage
 files directly, but works lock-free even with NFS.
-
 */
 package sos
 
@@ -64,7 +63,7 @@ func New(path string) (*SOS, error) {
 	}
 
 	// create directory for object storage
-	err := os.MkdirAll(path+"/.tmp", os.FileMode(0700))
+	err := os.MkdirAll(path+"/.tmp", os.FileMode(0o700))
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +117,7 @@ func (s *SOS) StoreFrom(key string, rd io.Reader) error {
 	tmpname := s.tmpfilename()
 
 	// write object to temporary file
-	wr, err := os.OpenFile(tmpname, os.O_WRONLY|os.O_CREATE, os.FileMode(0600))
+	wr, err := os.OpenFile(tmpname, os.O_WRONLY|os.O_CREATE, os.FileMode(0o600))
 	if err != nil {
 		return err
 	}
@@ -138,7 +137,7 @@ func (s *SOS) StoreFrom(key string, rd io.Reader) error {
 	// create directory in storage space.
 	// Note: errors are ok here, because the directory could have been created
 	// by another process in the meantime
-	_ = os.MkdirAll(dirname, os.FileMode(0700))
+	_ = os.MkdirAll(dirname, os.FileMode(0o700))
 
 	// move object to final directory and name
 	return os.Rename(tmpname, filename)
@@ -229,12 +228,4 @@ func (s *SOS) tmpfilename() string {
 		time.Now().UnixNano(),
 		rand.Intn(1<<32))
 	return tmpfname
-}
-
-// initialization
-
-func init() {
-	// seed the random number generator, so it delivers different random
-	// numbers on each startup.
-	rand.Seed(time.Now().UnixNano())
 }

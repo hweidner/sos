@@ -34,14 +34,14 @@ func TestSOS(t *testing.T) {
 
 	s.Delete(key1)
 	obj3, _ := s.Get(key1)
-	if string(obj3) != "" {
+	if len(obj3) > 0 {
 		t.Errorf("Got non empty value for deleted object")
 	}
 
 	s.Destroy()
 	s.StoreString(key1, val1)
 	obj4, _ := s.Get(key1)
-	if string(obj4) != "" {
+	if len(obj4) > 0 {
 		t.Errorf("Got non empty value from destroyed object store")
 	}
 }
